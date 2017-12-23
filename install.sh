@@ -29,6 +29,8 @@ apt_pkgs="\
     synaptic \
     gparted \
     nodejs \
+    openssl \
+    openssh-server \
     silversearcher-ag \
     thunderbird \
     enpass \
