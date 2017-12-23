@@ -1,6 +1,7 @@
 #/bin/bash
+[ `whoami` = root ] || exec su -c $0 root
 
-base_pkgs="build-essential linux-headers-$(uname -r) apt-transport-https ca-certificates software-properties-common curl gdebi"
+base_pkgs="build-essential linux-headers-$(uname -r) apt-transport-https ca-certificates software-properties-common curl gdebi snapd"
 
 apt_pkgs="\
     guake \
@@ -46,17 +47,17 @@ add_ppas() {
 
 rgdebi() {
     filename=`openssl rand -base64 12`
-    curl -J -L -O "/tmp/$2" $filename && gdebi "/tmp/$filename"
+    curl -J -L -O "/tmp/$filename" $1 && gdebi "/tmp/$filename"
 }
 
-sudo su
 
 #apt-pkgs
 apt-get update
-apt-get install "$base_pkgs"
-add_ppas()
+apt-get upgrade
+apt-get install -y --ignore-missing $base_pkgs
+add_ppas
 apt-get update
-apt-get install "$apt_pkgs"
+apt-get install -y --ignore-missing $apt_pkgs
 
 #pure .deb pkgs
 rgdebi "https://github.com/keeweb/keeweb/releases/download/v1.6.3/KeeWeb-1.6.3.linux.x64.deb"
@@ -76,4 +77,4 @@ sh -c "`curl -fsSL https://raw.githubusercontent.com/vtrbtf/dotfiles/master/inst
 curl http://j.mp/spf13-vim3 -L -o - | sh
 
 #hooks
-#(crontab -l 2>/dev/null; echo "@daily wget -O /etc/hosts https://github.com/StevenBlack/hosts/blob/master/alternates/fakenews-gambling-porn-social/hosts?raw=true") | crontab -
+(crontab -l 2>/dev/null; echo "@daily wget -O /etc/hosts https://github.com/StevenBlack/hosts/blob/master/alternates/fakenews-gambling-porn-social/hosts?raw=true") | crontab -
