@@ -1,6 +1,6 @@
 #/bin/bash
 
-base_pkgs="build-essential linux-headers-$(uname -r) apt-transport-https ca-certificates software-properties-common curl"
+base_pkgs="build-essential linux-headers-$(uname -r) apt-transport-https ca-certificates software-properties-common curl gdebi"
 
 apt_pkgs="\
     guake \
@@ -17,6 +17,7 @@ apt_pkgs="\
     tmux \
     bc \
     tree \
+    glipper \
     rsync \
     jq \
     ranger \
@@ -28,8 +29,9 @@ apt_pkgs="\
     synaptic \
     gparted \
     nodejs \
+    silversearcher-ag \
+    thunderbird \
     enpass \
-    gdebi \
     synapse"
 
 add_ppas() {
@@ -37,25 +39,39 @@ add_ppas() {
     curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
 
     #enpass
-    sudo echo "deb http://repo.sinew.in/ stable main" > /etc/apt/sources.list.d/enpass.list && wget -O - https://dl.sinew.in/keys/enpass-linux.key | sudo apt-key add -
+    echo "deb http://repo.sinew.in/ stable main" > /etc/apt/sources.list.d/enpass.list && wget -O - https://dl.sinew.in/keys/enpass-linux.key | apt-key add -
 }
 
-
 rgdebi() {
-    curl -J -L -O "/tmp/$2" $1 && gdebi "/tmp/$2"
+    filename=`openssl rand -base64 12`
+    curl -J -L -O "/tmp/$2" $filename && gdebi "/tmp/$filename"
 }
 
 sudo su
+
+#apt-pkgs
 apt-get update
 apt-get install "$base_pkgs"
 add_ppas()
 apt-get update
 apt-get install "$apt_pkgs"
 
-rgdebi "https://github.com/keeweb/keeweb/releases/download/v1.6.3/KeeWeb-1.6.3.linux.x64.deb" "keeweb.debi"
-rgdebi "https://go.microsoft.com/fwlink/?LinkID=760868" "vscode.deb"
-rgdebi "https://go.skype.com/skypeforlinux-64.deb" "skype.deb"
+#pure .deb pkgs
+rgdebi "https://github.com/keeweb/keeweb/releases/download/v1.6.3/KeeWeb-1.6.3.linux.x64.deb"
+rgdebi "https://go.microsoft.com/fwlink/?LinkID=760868"
+rgdebi "https://go.skype.com/skypeforlinux-64.deb"
 
+#snap pkgs
+snap install spotify
+snap install simplenote
 
-curl -fsSL get.docker.com -o get-docker.sh | sh
+#pip pkgs
+pip3 install autokey
 
+#curl based installers
+curl -fsSL get.docker.com  | sh
+sh -c "`curl -fsSL https://raw.githubusercontent.com/vtrbtf/dotfiles/master/install.sh`"
+curl http://j.mp/spf13-vim3 -L -o - | sh
+
+#hooks
+#(crontab -l 2>/dev/null; echo "@daily wget -O /etc/hosts https://github.com/StevenBlack/hosts/blob/master/alternates/fakenews-gambling-porn-social/hosts?raw=true") | crontab -
